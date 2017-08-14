@@ -1,1 +1,0 @@
-# herotoken-ico
