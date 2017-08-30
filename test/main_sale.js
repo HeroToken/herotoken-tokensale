@@ -39,7 +39,7 @@ contract('MainSale', function(accounts, others) {
   var token;
   var owner;
   beforeEach(function() {
-    return MainSale.new({gas: 2500000}).then(function(_sale) {
+    return MainSale.new({gas: 3000000}).then(function(_sale) {
       sale = _sale;
       return sale.owner();
     }).then(function(_owner) {
@@ -189,6 +189,35 @@ contract('MainSale', function(accounts, others) {
       });
     });
 
+    it("should not allow me to buy tokens below the minimum price", function() {
+      var initialTokens;
+      var initialEthers;
+      var finalTokens;
+      var finalEthers;
+      var buyer = accounts[0];
+      return sale.setMinimum(10 * ether).then(function() {
+        return Promise.all([
+          getEthers(buyer),
+          token.balanceOf(buyer),
+        ]);
+      }).then(function(_result) {
+        initialEthers = _result[0];
+        initialTokens = _result[1];
+        return sale.sendTransaction({from: buyer, value: 1 * ether});
+      }).catch(function(error) {
+        return Promise.all([
+          getEthers(buyer),
+          token.balanceOf(buyer),
+        ]);
+      }).then(function(_result) {
+        finalEthers = _result[0];
+        finalTokens = _result[1];
+
+        assert.equal(finalTokens.valueOf(), initialTokens.valueOf(), "Tokens unchanged");
+        assert.isBelow(initialEthers.valueOf() - finalEthers.valueOf(), 0.01 * ether, "Did not spend much ether");
+      });
+    });
+
     it("should not allow me to buy tokens after the sale by paying the contract", function() {
       var initialTokens;
       var initialEthers;
@@ -218,7 +247,7 @@ contract('MainSale', function(accounts, others) {
       });
     });
 
-    it("should not allow me to buy tokens after the sale by paying the contract", function() {
+    it("should not allow me to buy tokens after the sale is stopped by paying the contract", function() {
       var initialTokens;
       var initialEthers;
       var finalTokens;
