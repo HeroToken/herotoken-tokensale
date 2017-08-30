@@ -40,7 +40,7 @@ var closeEnough = function(a, b, fraction) {
 
 contract('HeroToken', function(accounts) {
   beforeEach(function() {
-    return MainSale.new({gas: 2500000}).then(function(_sale) {
+    return MainSale.new({gas: 3000000}).then(function(_sale) {
       sale = _sale;
       return sale.owner();
     }).then(function(_owner) {
